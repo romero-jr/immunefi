@@ -921,20 +921,11 @@
   <p>Every piece of content, every sales enablement asset, and every community activation in this plan is only as good as the ICP it's built on. Messaging without this research reflects our assumptions about buyer language, not the buyer's own words. Errors here compound through every downstream initiative.</p>
 
   <h3 class="sub">Priority 2: Activate the researcher community (Weeks 3–8)</h3>
-  <p>The researcher community is Immunefi's single highest-leverage marketing asset. The infrastructure is already there: All Stars, the Leaderboard, the Whitehat Hall of Fame, and Top 10 Bugs. With no marketing function in place, nobody has built the layer that turns it into demand.</p>
+  <p>The researcher community is Immunefi's single highest-leverage marketing asset. The infrastructure is in place: All Stars, the Leaderboard, the Whitehat Hall of Fame, and Top 10 Bugs. With no marketing function in place, nobody has built the layer that turns it into demand.</p>
   <p><strong>First, trust compounds slowly.</strong> A researcher community that's dormant for another month is an asset that's atrophying, not waiting. <strong>Second, the community programs in Priority 2 will surface the content and the signal that make the infrastructure in Priority 3 worth building.</strong> Researchers see what Immunefi's buyers care about before anyone else does. Automating before I've validated what to produce only scales incorrect assumptions faster.</p>
 
   <h3 class="sub">Priority 3: Build the engine (Weeks 5–12)</h3>
   <p>With buyer truth in hand and community programs running, I build the operating layer: a messaging architecture per product, a content engine powered by the AI workflow in Part B, sales enablement for PR Reviews, and the reporting that ties marketing to pipeline. Building infrastructure before buyer insights and community programs are in place risks optimizing a system around assumptions that have not yet been validated.</p>
-
-  <h3 class="sub">What I am deliberately not doing in the first 90 days</h3>
-  <ul class="doc-list">
-    <li>Brand redesigns</li>
-    <li>Paid acquisition at scale</li>
-    <li>Event sponsorships</li>
-    <li>Token marketing campaigns</li>
-  </ul>
-  <p>Each is either premature or lower-leverage than the three priorities above. The token reasoning is on page 3.</p>
 
   <!-- ═══════════════════════════════════════════ -->
   <!-- PAGE 2 — TWO PRODUCTS, TWO MOTIONS         -->
@@ -1309,6 +1300,10 @@
     </div>
 
   </div>
+
+  <h3 class="sub">How the tools connect and what comes out</h3>
+  <p>In the automated version, a security event anywhere in Web3 triggers n8n automatically. RSS.app feeds from Rekt.news, DeFiLlama, and blockchain security disclosures route into a scoring node that calls Claude Sonnet 4.6 via the Anthropic API. The model returns a structured JSON object: relevance score, event magnitude, suggested angle, and a flag for any Immunefi-client involvement. Signals scoring 7 or above generate a brief in a Notion queue; a second automation calls Claude to draft the full content package against a versioned template. Any signal flagged for client involvement routes to the incident protocol instead of the drafting queue. Nothing enters the publish step without passing through the human review gate.</p>
+  <p>In the AI-assisted version, the trigger is me running a pre-built Perplexity Pro prompt each morning, or immediately on a known incident. Perplexity searches live sources and returns a ranked brief. I review it, select which signals to act on, and paste the approved brief into a Claude Pro Project that already contains the brand voice, content templates, and guardrails. Claude drafts the package. In both versions, the output entering the review queue is the same: a publish-ready analysis, social thread, and newsletter block, with sources attached, ready for verification within 30 to 60 minutes of the triggering event.</p>
 
   <h3 class="sub">How I would know it is working: four metrics</h3>
 
