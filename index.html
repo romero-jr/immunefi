@@ -1,0 +1,1413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Building the Immunefi Marketing Engine — Miguel · June 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@700;800;900&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #F7F5F0;
+    --surface:   #EFECEA;
+    --ink:       #111111;
+    --ink-2:     #444444;
+    --ink-3:     #9A9490;
+    --orange:    #E8541A;
+    --orange-lt: #FBE9E2;
+    --rule:      #E2DDD8;
+    --mono:      'JetBrains Mono', monospace;
+    --sans:      'Inter', system-ui, sans-serif;
+    --max:       720px;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink-2);
+    font-family: var(--sans);
+    font-size: 15.5px;
+    line-height: 1.72;
+    font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── progress bar ── */
+  #progress {
+    position: fixed;
+    top: 0; left: 0;
+    height: 2px;
+    width: 0%;
+    background: var(--orange);
+    z-index: 100;
+    transition: width 0.1s linear;
+  }
+
+  /* ── nav ── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 40px;
+    z-index: 90;
+    transition: background 0.3s ease, border-color 0.3s ease;
+    border-bottom: 0.5px solid transparent;
+  }
+
+  nav.nav-dark {
+    background: transparent;
+    border-bottom-color: rgba(255,255,255,0.08);
+  }
+
+  nav.nav-light {
+    background: rgba(247,245,240,0.94);
+    backdrop-filter: blur(10px);
+    border-bottom-color: var(--rule);
+  }
+
+  nav .brand {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    transition: color 0.3s ease;
+  }
+
+  nav.nav-dark .brand  { color: rgba(255,255,255,0.5); }
+  nav.nav-light .brand { color: var(--ink-3); }
+  nav .brand span { color: var(--orange); }
+
+  nav .nav-links {
+    display: flex;
+    gap: 24px;
+    list-style: none;
+  }
+
+  nav .nav-links a {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    text-decoration: none;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    transition: color 0.15s;
+  }
+
+  nav.nav-dark  .nav-links a { color: rgba(255,255,255,0.45); }
+  nav.nav-light .nav-links a { color: var(--ink-3); }
+  nav .nav-links a:hover { color: var(--orange); }
+
+  .pdf-btn {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    background: transparent;
+    border-radius: 4px;
+    padding: 5px 12px;
+    cursor: pointer;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  nav.nav-dark .pdf-btn  { color: rgba(255,255,255,0.6); border: 0.5px solid rgba(255,255,255,0.25); }
+  nav.nav-light .pdf-btn { color: var(--orange); border: 0.5px solid var(--orange); }
+  .pdf-btn:hover { background: var(--orange); color: #fff !important; border-color: var(--orange) !important; }
+  .pdf-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+  .pdf-btn svg { width: 11px; height: 11px; flex-shrink: 0; }
+
+  @media print { nav, #progress, .pdf-btn { display: none !important; } }
+
+  /* ── wrapper ── */
+  .wrapper {
+    max-width: var(--max);
+    margin: 0 auto;
+    padding: 0 40px;
+  }
+
+  /* ── cover shell (full-bleed dark) ── */
+  .cover-shell {
+    background-color: #080808;
+    background-image:
+      radial-gradient(ellipse 70% 60% at 50% 50%, rgba(255,255,255,0) 0%, #080808 100%),
+      radial-gradient(circle, rgba(255,255,255,0.09) 1px, transparent 1px);
+    background-size: auto, 26px 26px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* ── cover inner (constrained) ── */
+  .cover {
+    max-width: var(--max);
+    margin: 0 auto;
+    padding: 0 40px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-top: 80px;
+    padding-bottom: 80px;
+  }
+
+  .cover-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: rgba(255,255,255,0.35);
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    margin-bottom: 36px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .cover-label::before {
+    content: '';
+    display: block;
+    width: 20px;
+    height: 1px;
+    background: var(--orange);
+  }
+
+  /* Immunefi-style diamond logo mark */
+  .cover-logomark {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 56px;
+  }
+
+  .cover-logomark svg { width: 32px; height: 32px; }
+
+  .cover-logomark span {
+    font-family: 'Barlow', var(--sans);
+    font-size: 20px;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: 0.01em;
+  }
+
+  .cover-title {
+    font-family: 'Barlow', var(--sans);
+    font-size: clamp(44px, 7.5vw, 80px);
+    font-weight: 900;
+    color: #ffffff;
+    line-height: 0.97;
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
+    margin-bottom: 40px;
+  }
+
+  .cover-title em {
+    font-style: normal;
+    color: var(--orange);
+  }
+
+  .cover-rule {
+    width: 40px;
+    height: 2px;
+    background: var(--orange);
+    margin-bottom: 36px;
+  }
+
+  .cover-meta {
+    display: flex;
+    gap: 40px;
+    margin-bottom: 64px;
+  }
+
+  .cover-meta-item dt {
+    font-family: var(--mono);
+    font-size: 9.5px;
+    color: rgba(255,255,255,0.3);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    margin-bottom: 5px;
+  }
+
+  .cover-meta-item dd {
+    font-size: 14px;
+    color: rgba(255,255,255,0.75);
+    font-weight: 500;
+  }
+
+  .cover-ctas {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 80px;
+  }
+
+  .cover-btn-primary {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    background: #fff;
+    color: #080808;
+    border: none;
+    border-radius: 3px;
+    padding: 12px 24px;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+  }
+
+  .cover-btn-primary:hover { background: var(--orange); color: #fff; }
+
+  .cover-btn-secondary {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    background: transparent;
+    color: rgba(255,255,255,0.7);
+    border: 0.5px solid rgba(255,255,255,0.3);
+    border-radius: 3px;
+    padding: 12px 24px;
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s;
+  }
+
+  .cover-btn-secondary:hover { border-color: rgba(255,255,255,0.7); color: #fff; }
+
+  .cover-scroll {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: rgba(255,255,255,0.25);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    animation: pulse 2.5s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 0.4; }
+    50%       { opacity: 1;   }
+  }
+
+  .cover-scroll::before {
+    content: '';
+    display: block;
+    width: 24px;
+    height: 1px;
+    background: rgba(255,255,255,0.25);
+  }
+
+  /* transition band between dark cover and light content */
+  .cover-fade {
+    height: 80px;
+    background: linear-gradient(to bottom, #080808, var(--bg));
+  }
+
+  /* ── section breaks ── */
+  .section-break {
+    padding-top: 80px;
+    margin-bottom: 56px;
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+
+  .section-break.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .section-eyebrow {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    color: var(--orange);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .section-eyebrow::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--orange);
+    opacity: 0.35;
+  }
+
+  .section-title {
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--ink);
+    line-height: 1.2;
+    letter-spacing: -0.015em;
+    margin-bottom: 32px;
+  }
+
+  /* ── part divider (Part A / Part B) ── */
+  .part-divider {
+    background: var(--ink);
+    margin: 100px -40px;
+    padding: 56px 40px;
+  }
+
+  .part-divider .part-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--orange);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    margin-bottom: 16px;
+  }
+
+  .part-divider .part-title {
+    font-size: 32px;
+    font-weight: 600;
+    color: #F7F5F0;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    margin-bottom: 8px;
+  }
+
+  .part-divider .part-sub {
+    font-size: 14px;
+    color: #7A7874;
+    font-family: var(--mono);
+  }
+
+  /* ── headings ── */
+  h3.sub {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin: 44px 0 14px;
+    font-family: var(--mono);
+  }
+
+  /* ── body text ── */
+  p {
+    margin-bottom: 18px;
+    color: var(--ink-2);
+  }
+
+  p strong {
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  /* ── bullets ── */
+  ul.doc-list {
+    list-style: none;
+    margin: 0 0 20px;
+    padding: 0;
+  }
+
+  ul.doc-list li {
+    padding-left: 20px;
+    position: relative;
+    margin-bottom: 10px;
+    color: var(--ink-2);
+  }
+
+  ul.doc-list li::before {
+    content: '—';
+    position: absolute;
+    left: 0;
+    color: var(--orange);
+    font-weight: 600;
+    font-size: 12px;
+    top: 1px;
+  }
+
+  ul.doc-list li strong {
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  /* ── inline note / callout ── */
+  .callout {
+    border-left: 2px solid var(--orange);
+    padding: 14px 20px;
+    margin: 28px 0;
+    background: var(--orange-lt);
+    border-radius: 0 4px 4px 0;
+  }
+
+  .callout p {
+    margin: 0;
+    font-size: 14px;
+    color: var(--ink-2);
+  }
+
+  /* ── milestone cards ── */
+  .milestones {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+    margin: 28px 0;
+  }
+
+  .milestone-card {
+    background: var(--surface);
+    border: 0.5px solid var(--rule);
+    border-radius: 6px;
+    padding: 20px 18px;
+  }
+
+  .milestone-card .m-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--orange);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 12px;
+  }
+
+  .milestone-card .m-heading {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 10px;
+  }
+
+  .milestone-card .m-body {
+    font-size: 12.5px;
+    line-height: 1.6;
+    color: var(--ink-3);
+    margin: 0;
+  }
+
+  .milestone-card .m-targets {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 0.5px solid var(--rule);
+  }
+
+  .milestone-card .m-target {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--orange);
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  /* ── flow diagram (Part B) ── */
+  .flow {
+    background: var(--ink);
+    border-radius: 8px;
+    padding: 28px 24px;
+    margin: 28px 0;
+  }
+
+  .flow-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--orange);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 20px;
+  }
+
+  .flow-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .flow-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .flow-connector {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+    width: 28px;
+  }
+
+  .flow-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--orange);
+    flex-shrink: 0;
+    margin-top: 6px;
+  }
+
+  .flow-line {
+    width: 1px;
+    flex: 1;
+    background: #333;
+    min-height: 24px;
+    margin-top: 4px;
+    margin-bottom: 4px;
+  }
+
+  .flow-content {
+    padding-bottom: 20px;
+  }
+
+  .flow-step-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--orange);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 4px;
+  }
+
+  .flow-step-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #F0EDE8;
+    margin-bottom: 4px;
+  }
+
+  .flow-step-desc {
+    font-size: 12.5px;
+    color: #7A7874;
+    line-height: 1.55;
+    margin: 0;
+  }
+
+  /* ── metrics grid ── */
+  .metrics {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin: 28px 0;
+  }
+
+  .metric-card {
+    border: 0.5px solid var(--rule);
+    border-radius: 6px;
+    padding: 18px;
+    background: var(--surface);
+  }
+
+  .metric-num {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--orange);
+    margin-bottom: 8px;
+  }
+
+  .metric-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 6px;
+  }
+
+  .metric-body {
+    font-size: 12.5px;
+    color: var(--ink-3);
+    line-height: 1.55;
+    margin: 0;
+  }
+
+  .metric-target {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 0.5px solid var(--rule);
+    font-family: var(--mono);
+    font-size: 10.5px;
+    color: var(--orange);
+  }
+
+  /* ── dependencies table ── */
+  .deps {
+    margin: 20px 0 28px;
+  }
+
+  .dep-group {
+    margin-bottom: 28px;
+  }
+
+  .dep-group-label {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    color: var(--ink-3);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 0.5px solid var(--rule);
+  }
+
+  .dep-item {
+    display: grid;
+    grid-template-columns: 1fr 1.4fr;
+    gap: 16px;
+    padding: 12px 0;
+    border-bottom: 0.5px solid var(--rule);
+    align-items: start;
+  }
+
+  .dep-ask {
+    font-size: 13.5px;
+    font-weight: 500;
+    color: var(--ink);
+    line-height: 1.4;
+  }
+
+  .dep-why {
+    font-size: 12.5px;
+    color: var(--ink-3);
+    line-height: 1.5;
+  }
+
+  /* ── incident timeline ── */
+  .incident-timeline {
+    margin: 24px 0;
+  }
+
+  .incident-row {
+    display: grid;
+    grid-template-columns: 96px 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
+    align-items: start;
+  }
+
+  .incident-time {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    color: var(--orange);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding-top: 2px;
+    line-height: 1.4;
+  }
+
+  .incident-body {
+    font-size: 13.5px;
+    color: var(--ink-2);
+    line-height: 1.65;
+    border-left: 1px solid var(--rule);
+    padding-left: 20px;
+  }
+
+  .incident-harder {
+    background: #FFF0EA;
+    border: 0.5px solid #F5C4AA;
+    border-radius: 6px;
+    padding: 20px;
+    margin-top: 24px;
+  }
+
+  .incident-harder .harder-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--orange);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 10px;
+  }
+
+  .incident-harder p {
+    font-size: 13.5px;
+    margin: 0;
+    color: var(--ink-2);
+  }
+
+  /* ── assumption list ── */
+  .assumption {
+    display: grid;
+    grid-template-columns: 28px 1fr;
+    gap: 12px;
+    margin-bottom: 16px;
+    align-items: start;
+  }
+
+  .assumption-num {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--orange);
+    padding-top: 2px;
+  }
+
+  .assumption-text {
+    font-size: 14px;
+    color: var(--ink-2);
+    line-height: 1.65;
+  }
+
+  /* ── breaking points ── */
+  .breaking {
+    background: var(--surface);
+    border: 0.5px solid var(--rule);
+    border-radius: 6px;
+    padding: 20px 20px 8px;
+    margin: 24px 0;
+  }
+
+  .breaking-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--ink-3);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 14px;
+  }
+
+  /* ── footer ── */
+  footer {
+    border-top: 0.5px solid var(--rule);
+    margin-top: 80px;
+    padding: 32px 0 48px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  footer .f-brand {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    color: var(--ink-3);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  footer .f-brand span { color: var(--orange); }
+
+  footer .f-date {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    color: var(--ink-3);
+  }
+
+  /* ── responsive ── */
+  @media (max-width: 600px) {
+    .wrapper { padding: 0 20px; }
+    nav { padding: 0 20px; }
+    nav .nav-links { display: none; }
+    .milestones { grid-template-columns: 1fr; }
+    .metrics { grid-template-columns: 1fr; }
+    .dep-item { grid-template-columns: 1fr; gap: 4px; }
+    .part-divider { margin: 80px -20px; padding: 40px 20px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .section-break { opacity: 1; transform: none; transition: none; }
+  }
+
+  /* ── workflow comparison ── */
+  .pw { display: flex; flex-direction: column; gap: 14px; margin: 28px 0; }
+  .pb { border: 0.5px solid var(--rule); border-radius: 8px; overflow: hidden; }
+  .ph { padding: 10px 16px; background: var(--surface); border-bottom: 0.5px solid var(--rule); display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+  .ph-label { font-size: 13px; font-weight: 500; color: var(--ink); white-space: nowrap; }
+  .ph-meta { font-size: 10.5px; color: var(--ink-3); font-family: var(--mono); text-align: right; }
+  .sg { display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); }
+  .sc { padding: 12px 12px; border-right: 0.5px solid var(--rule); min-width: 0; }
+  .sc:last-child { border-right: none; }
+  .sc.dim { background: var(--surface); }
+  .sn { font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--ink-3); margin-bottom: 5px; }
+  .st { font-size: 12px; font-weight: 600; color: var(--ink); margin-bottom: 4px; line-height: 1.3; }
+  .sd { font-size: 11px; color: var(--ink-2); line-height: 1.45; margin-bottom: 7px; }
+  .bdg { display: inline-block; font-size: 9px; font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase; padding: 2px 6px; border-radius: 3px; line-height: 1.4; }
+  .bdg-ai { background: #E6F1FB; color: #185FA5; }
+  .bdg-hu { background: #EAF3DE; color: #3B6D11; }
+  .bdg-bo { background: #FAEEDA; color: #854F0B; }
+  .same-note { text-align: center; font-size: 10px; color: var(--ink-3); font-family: var(--mono); padding: 7px 0 2px; letter-spacing: 0.04em; }
+  .cmp-table { border: 0.5px solid var(--rule); border-radius: 8px; overflow: hidden; }
+  .cmp-table table { width: 100%; border-collapse: collapse; }
+  .cmp-table thead th { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-3); padding: 8px 14px; text-align: left; background: var(--surface); border-bottom: 0.5px solid var(--rule); }
+  .cmp-table thead th:not(:first-child) { text-align: center; }
+  .cmp-table tbody td { padding: 9px 14px; font-size: 12px; color: var(--ink-2); border-bottom: 0.5px solid var(--rule); vertical-align: middle; }
+  .cmp-table tbody tr:last-child td { border-bottom: none; }
+  .cmp-table tbody td:first-child { font-weight: 500; color: var(--ink); font-size: 11.5px; }
+  .cmp-table tbody td:not(:first-child) { text-align: center; }
+  .tbl-win { color: #3B6D11; font-weight: 500; }
+  .tbl-draw { color: var(--ink-2); }
+</style>
+</head>
+<body>
+
+<div id="progress"></div>
+
+<nav class="nav-dark" id="mainNav">
+  <div class="brand"><span>Immunefi</span> · Marketing Brief</div>
+  <ul class="nav-links">
+    <li><a href="#strategy">Strategy</a></li>
+    <li><a href="#gtm">GTM</a></li>
+    <li><a href="#milestones">Milestones</a></li>
+    <li><a href="#workflow">AI Workflow</a></li>
+  </ul>
+  <button class="pdf-btn" id="downloadPdf" onclick="downloadPDF()">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M8 2v8M5 7l3 3 3-3M3 12h10"/>
+    </svg>
+    Download PDF
+  </button>
+</nav>
+
+<!-- ── DARK COVER (full-bleed) ── -->
+<section class="cover-shell" id="coverShell">
+  <div class="cover">
+
+    <div class="cover-logomark">
+      <!-- Immunefi diamond mark approximation -->
+      <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M16 2L28 9.5V22.5L16 30L4 22.5V9.5L16 2Z" stroke="white" stroke-width="1.5"/>
+        <path d="M16 8L24 12.5V21.5L16 26L8 21.5V12.5L16 8Z" fill="white" fill-opacity="0.15" stroke="white" stroke-width="0.75"/>
+        <path d="M16 13L20 15.5V20.5L16 23L12 20.5V15.5L16 13Z" fill="white"/>
+      </svg>
+      <span>Immunefi</span>
+    </div>
+
+    <div class="cover-label">Marketing Strategy Brief · Part A + B</div>
+
+    <h1 class="cover-title">Building the<br>Immunefi<br><em>Marketing</em><br>Engine</h1>
+
+    <div class="cover-rule"></div>
+
+    <dl class="cover-meta">
+      <div class="cover-meta-item">
+        <dt>Author</dt>
+        <dd>Miguel</dd>
+      </div>
+      <div class="cover-meta-item">
+        <dt>Date</dt>
+        <dd>June 2026</dd>
+      </div>
+      <div class="cover-meta-item">
+        <dt>Scope</dt>
+        <dd>90-Day Plan</dd>
+      </div>
+    </dl>
+
+    <div class="cover-ctas">
+      <button class="cover-btn-primary" onclick="document.getElementById('strategy').scrollIntoView({behavior:'smooth'})">Read the Brief</button>
+      <button class="cover-btn-secondary" onclick="downloadPDF()">Download PDF</button>
+    </div>
+
+    <div class="cover-scroll">Scroll to read</div>
+  </div>
+</section>
+
+<div class="cover-fade"></div>
+
+<div class="wrapper">
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- PAGE 1 — STRATEGY AND PRIORITIES           -->
+  <!-- ═══════════════════════════════════════════ -->
+  <div class="section-break" id="strategy">
+    <div class="section-eyebrow">Page 1</div>
+    <h2 class="section-title">Strategy and Priorities</h2>
+  </div>
+
+  <h3 class="sub">Situation</h3>
+  <p>Most startups spend years trying to earn what Immunefi already has: genuine authority in Web3 security, a community of 60,000 researchers, $190B+ in assets under protection, and two products with real traction. The gap is not credibility. It is that none of it is wired to a marketing engine yet, because there has not been one. That is the opportunity this role steps into: not building a brand from zero, but building the system that finally converts a brand this strong into revenue.</p>
+  <p>The first 90 days are about wiring it in the right order. Each priority below feeds the next.</p>
+
+  <h3 class="sub">Priority 1 — Learn the buyer (Weeks 1–4)</h3>
+  <p>Before writing a single line of positioning, I want to know why protocols actually buy. That means sitting in on live sales calls, interviewing 10–15 current customers across both products, and talking to the deals we lost. I am listening for three things: what triggered the purchase, what almost killed it, and the exact words buyers use to describe the problem. The output is a validated ICP and buyer journey for each product — built from what customers said, not what we assume.</p>
+  <p>The rationale for starting here is structural, not procedural. Every piece of content, every sales enablement asset, and every community activation in this plan is only as good as the ICP it is built on. Messaging without this research reflects our assumptions about buyer language, not the buyer's own words. Get this wrong and the next 60 days amplify the mistake.</p>
+
+  <h3 class="sub">Priority 2 — Activate the researcher community (Weeks 3–8)</h3>
+  <p>The researcher community is Immunefi's single highest-leverage marketing asset. The infrastructure is already there — All Stars, the Leaderboard, the Whitehat Hall of Fame, Top 10 Bugs — but with no marketing function, nobody has built the layer that turns it into demand. Community activation ranks above infrastructure for two explicit reasons.</p>
+  <p><strong>First, trust compounds slowly.</strong> A researcher community that is dormant for another month is an asset that is atrophying, not waiting. <strong>Second, the community programs in Priority 2 will surface the content and the signal that make the infrastructure in Priority 3 worth building.</strong> Researchers see what Immunefi's buyers care about before anyone else does. Automate before you have validated what to produce and you just scale the wrong assumptions faster.</p>
+
+  <h3 class="sub">Priority 3 — Build the engine (Weeks 5–12)</h3>
+  <p>With buyer truth in hand and community programs running, I build the operating layer: a messaging architecture per product, a content engine powered by the AI workflow in Part B, sales enablement for PR Reviews, and the reporting that ties marketing to pipeline. Infrastructure comes last on purpose. Building it first would be precise execution of the wrong plan.</p>
+
+  <h3 class="sub">What I am deliberately not doing in the first 90 days</h3>
+  <ul class="doc-list">
+    <li>Brand redesigns</li>
+    <li>Paid acquisition at scale</li>
+    <li>Event sponsorships</li>
+    <li>Token marketing campaigns</li>
+  </ul>
+  <p>Each is either premature or lower-leverage than the three priorities above. The token reasoning is on page 3.</p>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- PAGE 2 — TWO PRODUCTS, TWO MOTIONS         -->
+  <!-- ═══════════════════════════════════════════ -->
+  <div class="section-break" id="gtm">
+    <div class="section-eyebrow">Page 2</div>
+    <h2 class="section-title">Go-to-Market: Two Products, Two Motions</h2>
+  </div>
+
+  <p>Security Subscriptions and PR Reviews look like one product line, but they are two different sales motions on a shared foundation. Treating them as one go-to-market would be the most expensive mistake of the first year.</p>
+
+  <h3 class="sub">Security Subscriptions — a trust-and-timing motion</h3>
+  <p>This buyer (founder, CTO, security lead) already knows they need continuous coverage. The purchase fires on a trigger: a funding round, a TVL jump, a near-miss, or a competitor getting exploited. Immunefi's track record does a lot of the selling on its own — $110M+ paid out, the $10M Wormhole bounty. Marketing has two jobs: be impossible to miss at the trigger moment, and make the buying decision easy once they are looking.</p>
+
+  <p><strong>The three tactics I would activate first:</strong></p>
+  <ul class="doc-list">
+    <li><strong>Exploit post-mortems published within 48 hours</strong> of any major Web3 incident. Not to exploit a competitor's bad day, but to be the authoritative voice exactly when buyer attention is highest. This is also the primary job for the AI pipeline in Part B.</li>
+    <li><strong>Owning the search terms that fire at trigger moments:</strong> "smart contract bug bounty platform," "managed triage service crypto," "web3 vulnerability disclosure." These are low-volume, high-intent queries. The buyer is already in-market.</li>
+    <li><strong>Case studies built around payout transparency and time-to-triage benchmarks</strong> — the two data points that directly address the questions that kill deals late: does this actually work, and how fast? Managed Triage gets its own angle: roughly 3x cheaper than building triage capacity in-house, aimed at teams drowning in invalid reports.</li>
+  </ul>
+
+  <h3 class="sub">PR Reviews — a workflow-adoption motion</h3>
+  <p>PR Reviews drops elite researchers into a protocol's GitHub pull requests, with findings back in 24–72 hours. That changes who you are selling to: the engineering lead, not the security lead. The objection changes with them, from "do we need this?" to "will this slow my devs down?" This is a developer-led motion.</p>
+
+  <p><strong>The three tactics I would activate first:</strong></p>
+  <ul class="doc-list">
+    <li><strong>A zero-friction GitHub app install as the top of funnel.</strong> The trial should require no sales conversation, no demo, and no procurement cycle. A protocol's dev lead installs the app in three clicks and sees findings on their next PR. That moment — a real finding on real code — is the marketing.</li>
+    <li><strong>A "first repo free" offer</strong> to lower the activation bar further. One repository, no commitment, real findings. Land-and-expand from there: one repo today is warm pipeline for Subscriptions tomorrow, and vice versa.</li>
+    <li><strong>Placements in developer security newsletters</strong> (tl;dr sec, Hacking the Blockchain) to reach the engineering buyer where they already read. The line I would test first: <em>PR Reviews are the unit tests of security; audits are the final exam.</em> It positions the product alongside the audit budget instead of fighting it.</li>
+  </ul>
+
+  <h3 class="sub">Turning the community into distribution</h3>
+  <p>Four programs do the work.</p>
+
+  <ul class="doc-list">
+    <li>
+      <strong>Researcher spotlight series.</strong> The workflow: I identify two to three notable findings each month from the leaderboard or via the All Stars channel → reach out to the researcher directly with a clear ask and a specific format (600–800 word co-bylined post, their voice, my edit) → draft in a shared Notion doc → researcher reviews and approves → published across both their channel and Immunefi's. The outreach is personal, never templated. These are professionals who receive plenty of corporate asks and a cold mass email gets ignored. Target: first outreach in week two; first spotlight in draft by week four; two per month by day 60.
+    </li>
+    <li>
+      <strong>All Stars advocacy.</strong> In week one I identify the five to eight All Stars who are already active on X with an audience in the protocol-security overlap. The ask: early access to new features, a co-marketing slot for their next significant find, and a simple content kit — templates they can adapt, not copy. One rule: their words, never ours. Scripted advocacy reads as fake to this crowd and burns the exact trust that makes it work.
+    </li>
+    <li>
+      <strong>Rapid-response post-mortems.</strong> When something gets exploited anywhere in Web3 — a near-weekly event — Immunefi's researchers are the most qualified people alive to explain it. Researcher-reviewed analysis within 48 hours makes Immunefi the default source exactly when buyers are paying closest attention. This is also the main job for the AI pipeline in Part B.
+    </li>
+    <li>
+      <strong>A feedback loop back into GTM.</strong> Researchers see protocol security posture before anyone else. A monthly listening program — AMAs, surveys, a top-researcher council — feeds straight into product and positioning. I ran this exact play at Agoric and it produced 500+ insights that directly shaped GTM. The throughline across all four: researchers are partners, not megaphones. The moment they feel used, the asset starts to die.
+    </li>
+  </ul>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- PAGE 3 — TOKEN, DEPS, MILESTONES, INCIDENT -->
+  <!-- ═══════════════════════════════════════════ -->
+  <div class="section-break" id="milestones">
+    <div class="section-eyebrow">Page 3</div>
+    <h2 class="section-title">Token Sequencing, Dependencies, Milestones &amp; Incident Protocol</h2>
+  </div>
+
+  <h3 class="sub">Where the token fits — honestly</h3>
+  <p>Token marketing is not a top-three priority in the first 90 days, and I would rather say that plainly than tell you what sounds good. The token launched in January 2026 and is still working through post-launch sell pressure. Pushing hard on it now, before the fundamentals are visible, spends the one thing everything else runs on: platform credibility. Tokens borrow credibility from the platform underneath them. It never works the other way around.</p>
+  <p>The first 90 days are foundation only: read whether researchers are holding, selling, or ignoring the token; turn the tokenomics docs into one clear narrative with versions for researchers, protocols, and the wider ecosystem; and set a standing rule that token comms ride product milestones, never price.</p>
+  <p>That sets up a real activation push next quarter, anchored to a genuine utility launch. The clearest near-term example: native $IMM payment for PR Reviews, with credits redeemable against future bounty payouts. When that ships, the narrative writes itself — the first security workflow you can pay for in $IMM, where the token is the mechanism, not the marketing. That is a story about product, not price, and it survives a down market.</p>
+
+  <h3 class="sub">Dependencies</h3>
+  <div class="deps">
+
+    <div class="dep-group">
+      <div class="dep-group-label">From Product</div>
+      <div class="dep-item">
+        <div class="dep-ask">60–90 day roadmap visibility</div>
+        <div class="dep-why">Without this, I cannot sequence content around launches or set realistic Day-60 activation targets.</div>
+      </div>
+      <div class="dep-item">
+        <div class="dep-ask">Named engineering contact for PR Reviews funnel</div>
+        <div class="dep-why">The GitHub app install is the most important marketing moment in the PR Reviews motion. Without a named contact who owns that funnel, I cannot instrument, test, or iterate it.</div>
+      </div>
+      <div class="dep-item">
+        <div class="dep-ask">Product usage data: activation events, time-to-first-review, triage throughput</div>
+        <div class="dep-why">These are the leading indicators that tell me whether the product is landing before pipeline data is available. They are the only honest unit of account in the first 60 days.</div>
+      </div>
+    </div>
+
+    <div class="dep-group">
+      <div class="dep-group-label">From Sales</div>
+      <div class="dep-item">
+        <div class="dep-ask">Standing access to live calls and recordings in the first 30 days</div>
+        <div class="dep-why">This is the primary input for the ICP and buyer journey. Everything downstream depends on it.</div>
+      </div>
+      <div class="dep-item">
+        <div class="dep-ask">Shared qualified-lead definition agreed by Day 30</div>
+        <div class="dep-why">Without this, marketing-sourced pipeline is a number that neither function trusts.</div>
+      </div>
+      <div class="dep-item">
+        <div class="dep-ask">Loss-reason data including deals that never reached a call</div>
+        <div class="dep-why">Churned prospects and uncontacted leads are the fastest diagnostic for the conversion blockers that no amount of top-of-funnel spend can fix.</div>
+      </div>
+    </div>
+
+    <div class="dep-group">
+      <div class="dep-group-label">From Leadership</div>
+      <div class="dep-item">
+        <div class="dep-ask">Weekly 30-minute CEO sync for first month</div>
+        <div class="dep-why">The founding marketing hire needs unfiltered access to company context that is not in a brief.</div>
+      </div>
+      <div class="dep-item">
+        <div class="dep-ask">Pre-agreed crisis-communication protocol with named decision-makers</div>
+        <div class="dep-why">See incident protocol below. Decision authority must be established before it is needed.</div>
+      </div>
+      <div class="dep-item">
+        <div class="dep-ask">Explicit sign-off on the Day-90 success definition</div>
+        <div class="dep-why">If leadership's definition is revenue and mine is leading indicators, that is a conversation to have in week one, not week thirteen.</div>
+      </div>
+    </div>
+  </div>
+
+  <h3 class="sub">Milestones</h3>
+  <div class="milestones">
+    <div class="milestone-card">
+      <div class="m-label">Day 30</div>
+      <div class="m-heading">What I will know</div>
+      <p class="m-body">Top three objections in buyer language per product. Which product has the shorter sales cycle and why. Whether the two products share a buyer. The gap between how Immunefi describes the products and how buyers describe the problem.</p>
+      <div class="m-targets">
+        <span class="m-target">15+ customer interviews complete</span>
+        <span class="m-target">Validated ICP + buyer-journey docs per product</span>
+        <span class="m-target">Baselines set: page sessions, demo rate, GitHub installs</span>
+        <span class="m-target">Crisis protocol ratified</span>
+        <span class="m-target">AI pipeline v1 in production</span>
+      </div>
+    </div>
+    <div class="milestone-card">
+      <div class="m-label">Day 60</div>
+      <div class="m-heading">Engine running</div>
+      <p class="m-body">Messaging architecture shipped for both products. PR Reviews sales enablement in field use. Two researcher spotlights published. All Stars program live with 10+ participants. Two rapid-response post-mortems shipped. Token narrative in circulation.</p>
+      <div class="m-targets">
+        <span class="m-target">Page sessions +15% vs. baseline</span>
+        <span class="m-target">GitHub install rate improved</span>
+        <span class="m-target">Trial-to-meeting conversion tracked</span>
+      </div>
+    </div>
+    <div class="milestone-card">
+      <div class="m-label">Day 90</div>
+      <div class="m-heading">Measurable movement</div>
+      <p class="m-body">Marketing-sourced and influenced pipeline reported weekly. Researcher-driven content outperforming brand-channel content on engagement. 12-month plan and hiring case presented to leadership.</p>
+      <div class="m-targets">
+        <span class="m-target">Page traffic +30% vs. baseline</span>
+        <span class="m-target">Demo + trial request rate +25%</span>
+        <span class="m-target">GitHub installs trending week-over-week</span>
+      </div>
+    </div>
+  </div>
+  <p style="font-size:13px; color:var(--ink-3);">No revenue commitment is attached to Day 90. With enterprise-length sales cycles, leading indicators are the honest unit of account.</p>
+
+  <h3 class="sub">A protocol on Immunefi gets publicly exploited — my first 24 hours</h3>
+  <p>The governing principle: get internal alignment before making an external statement, but do not let silence run past the point where it becomes its own statement.</p>
+
+  <div class="incident-timeline">
+    <div class="incident-row">
+      <div class="incident-time">Hours 0–1</div>
+      <div class="incident-body">Response group convened (CEO, security lead, client owner) in a single channel. Fact base established — scope and status of the exploited vulnerability, prior report history, attack status, Safe Harbor applicability. All scheduled marketing frozen.</div>
+    </div>
+    <div class="incident-row">
+      <div class="incident-time">Hours 1–4</div>
+      <div class="incident-body">Holding statement drafted: awareness, contact with the affected team, update commitment. No speculation on cause, attribution, or amounts. Coordination with the affected protocol precedes any substantive statement — the incident belongs to the protocol and Immunefi communicates in support. Internal teams briefed with an approved Q&amp;A.</div>
+    </div>
+    <div class="incident-row">
+      <div class="incident-time">Hours 4–12</div>
+      <div class="incident-body">Holding statement published if public discussion already references Immunefi, otherwise held against a pre-agreed trigger. Researcher channels and crypto X monitored continuously; factual corrections issued and narrative engagement avoided.</div>
+    </div>
+    <div class="incident-row">
+      <div class="incident-time">Hours 12–24</div>
+      <div class="incident-body">Post-incident plan initiated — a researcher-reviewed technical post-mortem, contingent on settled facts and protocol consent. Decision log maintained for retrospective and protocol revision.</div>
+    </div>
+  </div>
+
+  <div class="incident-harder">
+    <div class="harder-label">The harder scenario</div>
+    <p>If the exploited vulnerability was previously reported through the Immunefi platform but not acted on by the protocol, the response changes materially. The response group expands immediately to include legal. The holding statement cannot be issued without legal review — not because Immunefi is at fault (responsibility for remediation sits with the protocol), but because any statement that can be read as minimizing the platform's role in disclosure must be reviewed before publication. The post-mortem is delayed until facts are fully settled and legal has cleared publication. Immunefi's long-term credibility depends on full transparency when the platform's own processes intersect with an incident, even when Immunefi's role was procedurally correct. A company that only communicates clearly when it is blameless does not earn trust. A company that communicates clearly even when the picture is complicated does.</p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- PAGE 4 — CONTEXT AND REASONING             -->
+  <!-- ═══════════════════════════════════════════ -->
+  <div class="section-break">
+    <div class="section-eyebrow">Page 4</div>
+    <h2 class="section-title">Context and Reasoning</h2>
+  </div>
+
+  <h3 class="sub">Why this order, not a faster one</h3>
+  <p>The instinct as a founding hire is to do everything at once. The discipline is refusing to. Messaging without buyer research is guessing. Community activation without messaging wastes the community's trust. Infrastructure without either just automates the mistakes. The cost is real — visible campaigns start in month two, not week two. I would rather name that trade-off in week one than explain weak results at quarter-end.</p>
+
+  <h3 class="sub">What I am assuming — and how I would check</h3>
+
+  <div class="assumption">
+    <div class="assumption-num">01</div>
+    <div class="assumption-text"><strong>Subscriptions demand is trigger-driven.</strong> I would check whether closed-won deals actually cluster after funding rounds and category exploits in the CRM.</div>
+  </div>
+  <div class="assumption">
+    <div class="assumption-num">02</div>
+    <div class="assumption-text"><strong>PR Reviews friction sits with the engineering buyer.</strong> I would check the call recordings and trial funnel drop-off.</div>
+  </div>
+  <div class="assumption">
+    <div class="assumption-num">03</div>
+    <div class="assumption-text"><strong>Researchers will co-create in public.</strong> I would check by asking ten of them in week one.</div>
+  </div>
+
+  <p style="margin-top:16px;">If any breaks, the plan bends: merge the messaging if the two products share one buyer; switch PR Reviews to a champion-enablement motion if friction is elsewhere; lead with infrastructure instead of community if researchers show advocacy fatigue.</p>
+
+  <h3 class="sub">Why community-led beats paid-led here</h3>
+  <p>Web3 security buyers are technical and allergic to advertising — trust moves through practitioners, not impressions. Immunefi already owns the biggest pool of credible practitioners in the category. Paid can amplify an engine that is already working; it cannot substitute for one. Spending on ads now would buy low-converting traffic while the asset that actually compounds sits idle.</p>
+
+  <h3 class="sub">What the existing programs tell me</h3>
+  <p>All Stars, the Leaderboard, the Hall of Fame, Top 10 Bugs — this is well-built community infrastructure. It rewards and ranks researchers. What is missing is the conversion layer on top: researcher stories packaged for buyers, community moments tied to product launches, advocacy with actual distribution goals. That is not a knock. It is what happens when there is no marketing function yet. It is also exactly where the leverage is.</p>
+
+  <h3 class="sub">On the token, one more time</h3>
+  <p>It is the shiniest surface in this whole assignment, and I ranked it behind the GTM foundation on purpose. The best token marketing move over the next two quarters is making the products undeniable, then letting the token narrative ride that momentum.</p>
+
+  <h3 class="sub">What would make me change the plan</h3>
+  <div class="breaking">
+    <div class="breaking-label">Breaking points</div>
+    <ul class="doc-list">
+      <li>If buyer research shows the two products share one buyer, the dual-motion structure collapses into one.</li>
+      <li>If researchers show advocacy fatigue, community activation moves behind infrastructure.</li>
+      <li>If leadership's definition of Day-90 success is revenue rather than leading indicators, that is a scope conversation I want in week one, not week thirteen.</li>
+    </ul>
+  </div>
+  <p>A plan that cannot name its own breaking points is not a strategy. It is a wish.</p>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- PART B DIVIDER                             -->
+  <!-- ═══════════════════════════════════════════ -->
+  <div class="part-divider">
+    <div class="part-label">Part B</div>
+    <div class="part-title">AI Workflow Design</div>
+    <div class="part-sub">The Security Signal-to-Content Pipeline</div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- PART B CONTENT                             -->
+  <!-- ═══════════════════════════════════════════ -->
+  <div class="section-break" id="workflow">
+    <div class="section-eyebrow">AI Workflow</div>
+    <h2 class="section-title">The Security Signal-to-Content Pipeline</h2>
+  </div>
+
+  <h3 class="sub">Problem</h3>
+  <p>The highest-return content opportunity available to Immunefi is speed and authority on security events — exploits, disclosures, major payouts, and ecosystem incidents — which correspond directly to the Subscriptions purchase trigger identified in Part A. The constraint is capacity: a single marketer cannot continuously monitor the Web3 security landscape, produce technically credible analysis, and publish inside the 24–48 hour relevance window while also running the other programs in this brief.</p>
+  <p>The workflow compresses a function that would otherwise require two to three staff into a review-and-publish operation for one. The same class of system, deployed at Agoric, produced a 3x increase in content output and a 70% reduction in production time.</p>
+
+  <h3 class="sub">Two approaches, same output</h3>
+  <p>The workflow exists in two forms depending on budget and infrastructure appetite. Both use AI at every substantive step and produce the same publish-ready output. The difference is who pulls the trigger and what it costs per month. The human gate at the end is identical in both — no content publishes without review, and technical claims always require researcher sign-off.</p>
+
+  <div class="pw">
+
+    <div class="pb">
+      <div class="ph">
+        <span class="ph-label">Automated pipeline</span>
+        <span class="ph-meta">~$60–100/mo · 24/7 continuous · requires n8n + API setup</span>
+      </div>
+      <div class="sg">
+        <div class="sc">
+          <div class="sn">Detect</div>
+          <div class="st">RSS.app + n8n</div>
+          <div class="sd">Monitors Rekt.news, DeFiLlama, X lists, and Immunefi platform events continuously.</div>
+          <span class="bdg bdg-ai">AI automated</span>
+        </div>
+        <div class="sc">
+          <div class="sn">Triage</div>
+          <div class="st">Claude API</div>
+          <div class="sd">Scoring agent rates each signal 0–10. Above threshold → structured brief in Notion queue.</div>
+          <span class="bdg bdg-ai">AI automated</span>
+        </div>
+        <div class="sc">
+          <div class="sn">Draft</div>
+          <div class="st">Claude API</div>
+          <div class="sd">Drafting agent produces full package per content template. Ready in 30–60 min.</div>
+          <span class="bdg bdg-ai">AI automated</span>
+        </div>
+        <div class="sc dim">
+          <div class="sn">Review</div>
+          <div class="st">Human gate</div>
+          <div class="sd">You + named researcher verify. Technical claims need researcher sign-off before publish.</div>
+          <span class="bdg bdg-bo">Human + AI</span>
+        </div>
+        <div class="sc dim">
+          <div class="sn">Publish</div>
+          <div class="st">You approve</div>
+          <div class="sd">Notion queue → blog post, X thread, newsletter block. Each approved individually.</div>
+          <span class="bdg bdg-hu">Human</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="same-note">↑ stages 4–5 are identical in both approaches — the human gate never leaves ↓</div>
+
+    <div class="pb">
+      <div class="ph">
+        <span class="ph-label">AI-assisted, human-triggered</span>
+        <span class="ph-meta">$20–40/mo flat · daily check or on alert · zero setup</span>
+      </div>
+      <div class="sg">
+        <div class="sc">
+          <div class="sn">Detect</div>
+          <div class="st">Perplexity Pro</div>
+          <div class="sd">You run a pre-built scan prompt each morning. Live web synthesis, sourced and ranked.</div>
+          <span class="bdg bdg-bo">Human + AI</span>
+        </div>
+        <div class="sc">
+          <div class="sn">Triage</div>
+          <div class="st">You decide</div>
+          <div class="sd">Scan the ranked brief. Pick which signals cross your threshold. Takes ~3 min.</div>
+          <span class="bdg bdg-hu">Human</span>
+        </div>
+        <div class="sc">
+          <div class="sn">Draft</div>
+          <div class="st">Claude Pro Project</div>
+          <div class="sd">Paste approved brief. Context pre-loaded: voice, templates, guardrails. Package in 5–10 min.</div>
+          <span class="bdg bdg-bo">Human + AI</span>
+        </div>
+        <div class="sc dim">
+          <div class="sn">Review</div>
+          <div class="st">Human gate</div>
+          <div class="sd">You + named researcher verify. Technical claims need researcher sign-off before publish.</div>
+          <span class="bdg bdg-bo">Human + AI</span>
+        </div>
+        <div class="sc dim">
+          <div class="sn">Publish</div>
+          <div class="st">You approve</div>
+          <div class="sd">Notion queue → blog post, X thread, newsletter block. Each approved individually.</div>
+          <span class="bdg bdg-hu">Human</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="cmp-table">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:28%"></th>
+            <th style="width:36%">Automated</th>
+            <th style="width:36%">AI-assisted</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Monthly cost</td>
+            <td>~$60–100 (API + hosting)</td>
+            <td class="tbl-win">$20–40 flat</td>
+          </tr>
+          <tr>
+            <td>Trigger</td>
+            <td>24/7, no action needed</td>
+            <td>Daily prompt or on alert</td>
+          </tr>
+          <tr>
+            <td>Event → draft ready</td>
+            <td class="tbl-draw">~30–60 min</td>
+            <td class="tbl-draw">~30–60 min</td>
+          </tr>
+          <tr>
+            <td>Setup required</td>
+            <td>Days (n8n + API + Notion)</td>
+            <td class="tbl-win">Minutes (zero config)</td>
+          </tr>
+          <tr>
+            <td>Output quality</td>
+            <td class="tbl-draw">High</td>
+            <td class="tbl-draw">High</td>
+          </tr>
+          <tr>
+            <td>Best suited for</td>
+            <td>3+ publishable events/week</td>
+            <td class="tbl-win">First 90 days and beyond</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <h3 class="sub">How I would know it is working — four metrics</h3>
+
+  <div class="metrics">
+    <div class="metric-card">
+      <div class="metric-num">01 · Speed</div>
+      <div class="metric-title">Time from event to publish</div>
+      <p class="metric-body">Tracked via Notion timestamps (event date field vs. publish date field).</p>
+      <div class="metric-target">Target: under 24h for major events vs. multi-day industry baseline</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-num">02 · Compression</div>
+      <div class="metric-title">Marketer hours per published unit</div>
+      <p class="metric-body">Tracked via a time-log field in the Notion review queue — I log time spent in review, not in drafting.</p>
+      <div class="metric-target">Target: 70% reduction vs. manual production within 30 days</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-num">03 · Quality-gate health</div>
+      <div class="metric-title">Drafts approved with minor edits</div>
+      <p class="metric-body">Rising rate = templates calibrating. Declining rate = system prompt retuning needed, not more output.</p>
+      <div class="metric-target">Target: 75%+ minor-edit approval rate by Day 60</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-num">04 · Business contribution</div>
+      <div class="metric-title">Event-driven vs. evergreen traffic</div>
+      <p class="metric-body">GA attribution comparing rapid-response content vs. evergreen. If rapid-response does not outperform by Day 60, I reexamine signal-scoring criteria, not publishing cadence.</p>
+      <div class="metric-target">Target: rapid-response drives 30%+ of product-page referral traffic within 60 days</div>
+    </div>
+  </div>
+
+  <h3 class="sub">Why this one, first</h3>
+  <p>Plenty of marketing work can be automated. This is the piece worth building before anything else — regardless of which version you start with. Both approaches make Immunefi the fastest credible voice on the events that already move its buyers. The AI-assisted version is the right starting point for the first 90 days: zero infrastructure cost, zero setup time, same output quality. The automated version earns its complexity only when event volume exceeds what a morning scan can manage — roughly three or more publishable events per week. Either way, it frees me up for the work no model can do: the customer interviews, the researcher relationships, and the judgment calls that require a human with context in the room.</p>
+
+  <!-- ── FOOTER ── -->
+  <footer>
+    <div class="f-brand"><span>Immunefi</span> · Marketing Brief · Part A + B</div>
+    <div class="f-date">Miguel · June 2026</div>
+  </footer>
+
+</div><!-- /wrapper -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script>
+  // progress bar + nav dark/light toggle
+  const mainNav    = document.getElementById('mainNav');
+  const coverShell = document.getElementById('coverShell');
+
+  window.addEventListener('scroll', () => {
+    const doc      = document.documentElement;
+    const scrolled = doc.scrollTop / (doc.scrollHeight - doc.clientHeight);
+    document.getElementById('progress').style.width = (scrolled * 100) + '%';
+
+    const coverBottom = coverShell.getBoundingClientRect().bottom;
+    if (coverBottom <= 52) {
+      mainNav.classList.replace('nav-dark', 'nav-light');
+    } else {
+      mainNav.classList.replace('nav-light', 'nav-dark');
+    }
+  });
+
+  // scroll-reveal for section breaks
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.15 });
+
+  document.querySelectorAll('.section-break').forEach(el => observer.observe(el));
+
+  // PDF download
+  function downloadPDF() {
+    const btn = document.getElementById('downloadPdf');
+    btn.disabled = true;
+    btn.textContent = 'Generating…';
+
+    // make all section-break elements visible so they render in the PDF
+    document.querySelectorAll('.section-break').forEach(el => el.classList.add('visible'));
+
+    const element = document.body;
+    const opt = {
+      margin:      [12, 14, 12, 14],
+      filename:    'Immunefi_Marketing_Brief_Miguel_June2026.pdf',
+      image:       { type: 'jpeg', quality: 0.97 },
+      html2canvas: { scale: 2, useCORS: true, letterRendering: true },
+      jsPDF:       { unit: 'mm', format: 'a4', orientation: 'portrait' },
+      pagebreak:   { mode: ['avoid-all', 'css'] }
+    };
+
+    html2pdf().set(opt).from(element).save().then(() => {
+      btn.disabled = false;
+      btn.innerHTML = `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v8M5 7l3 3 3-3M3 12h10"/></svg> Download PDF`;
+    });
+  }
+</script>
+</body>
+</html>
