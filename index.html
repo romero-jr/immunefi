@@ -1177,7 +1177,7 @@
   <p>This workflow compresses a function that would otherwise require two to three staff into a review-and-publish operation for one. A similar system deployed at Agoric roughly tripled content output and cut production time by approximately 70%.</p>
 
   <h3 class="sub">Two approaches, same output</h3>
-  <p>I'm building this in two forms depending on budget and infrastructure appetite. Both use AI at every substantive step and produce the same publish-ready output. The difference is who pulls the trigger and what it costs per month. The human gate at the end is identical in both: no content publishes without review, and technical claims always require researcher sign-off.</p>
+  <p>I'm building this in two forms depending on available budget and how much setup time makes sense. Both use AI at every substantive step and produce the same publish-ready output. The difference is whether the system runs automatically or whether I trigger it each morning. The human gate at the end is identical in both: no content publishes without my review, and technical claims always require researcher sign-off.</p>
 
   <div class="pw">
 
@@ -1189,20 +1189,20 @@
       <div class="sg">
         <div class="sc">
           <div class="sn">Detect</div>
-          <div class="st">RSS.app + n8n</div>
-          <div class="sd">Monitors Rekt.news, DeFiLlama, X lists, and Immunefi platform events continuously.</div>
+          <div class="st">Continuous monitoring</div>
+          <div class="sd">Watches security feeds, researcher activity, and Immunefi platform events around the clock.</div>
           <span class="bdg bdg-ai">AI automated</span>
         </div>
         <div class="sc">
           <div class="sn">Triage</div>
-          <div class="st">Claude API</div>
-          <div class="sd">Scoring agent rates each signal 0–10. Above threshold → structured brief in Notion queue.</div>
+          <div class="st">Relevance scoring</div>
+          <div class="sd">Each signal is scored and ranked. Only high-relevance events generate a brief for review.</div>
           <span class="bdg bdg-ai">AI automated</span>
         </div>
         <div class="sc">
           <div class="sn">Draft</div>
-          <div class="st">Claude API</div>
-          <div class="sd">Drafting agent produces full package per content template. Ready in 30–60 min.</div>
+          <div class="st">Content generation</div>
+          <div class="sd">Produces a full package — analysis, social thread, newsletter block — against pre-built templates.</div>
           <span class="bdg bdg-ai">AI automated</span>
         </div>
         <div class="sc dim">
@@ -1230,20 +1230,20 @@
       <div class="sg">
         <div class="sc">
           <div class="sn">Detect</div>
-          <div class="st">Perplexity Pro</div>
-          <div class="sd">You run a pre-built scan prompt each morning. Live web synthesis, sourced and ranked.</div>
+          <div class="st">Morning scan</div>
+          <div class="sd">A pre-built prompt searches live sources and returns a ranked list of relevant security events.</div>
           <span class="bdg bdg-bo">Human + AI</span>
         </div>
         <div class="sc">
           <div class="sn">Triage</div>
           <div class="st">You decide</div>
-          <div class="sd">Scan the ranked brief. Pick which signals cross your threshold. Takes ~3 min.</div>
+          <div class="sd">Review the ranked list. Select which events cross the threshold. Takes about 3 minutes.</div>
           <span class="bdg bdg-hu">Human</span>
         </div>
         <div class="sc">
           <div class="sn">Draft</div>
-          <div class="st">Claude Pro Project</div>
-          <div class="sd">Paste approved brief. Context pre-loaded: voice, templates, guardrails. Package in 5–10 min.</div>
+          <div class="st">AI drafting</div>
+          <div class="sd">Drop the approved brief into a pre-configured AI workspace. Full package ready in 5–10 min.</div>
           <span class="bdg bdg-bo">Human + AI</span>
         </div>
         <div class="sc dim">
@@ -1288,8 +1288,8 @@
           </tr>
           <tr>
             <td>Setup required</td>
-            <td>Days (n8n + API + Notion)</td>
-            <td class="tbl-win">Minutes (zero config)</td>
+            <td>Days (technical configuration)</td>
+            <td class="tbl-win">Minutes (zero configuration)</td>
           </tr>
           <tr>
             <td>Output quality</td>
@@ -1307,9 +1307,9 @@
 
   </div>
 
-  <h3 class="sub">How the tools connect and what comes out</h3>
-  <p>In the automated version, a security event anywhere in Web3 triggers n8n automatically. RSS.app feeds from Rekt.news, DeFiLlama, and blockchain security disclosures route into a scoring node that calls Claude Sonnet 4.6 via the Anthropic API. The model returns a structured JSON object: relevance score, event magnitude, suggested angle, and a flag for any Immunefi-client involvement. Signals scoring 7 or above generate a brief in a Notion queue; a second automation calls Claude to draft the full content package against a versioned template. Any signal flagged for client involvement routes to the incident protocol instead of the drafting queue. Nothing enters the publish step without passing through the human review gate.</p>
-  <p>In the AI-assisted version, the trigger is me running a pre-built Perplexity Pro prompt each morning, or immediately on a known incident. Perplexity searches live sources and returns a ranked brief. I review it, select which signals to act on, and paste the approved brief into a Claude Pro Project that already contains the brand voice, content templates, and guardrails. Claude drafts the package. In both versions, the output entering the review queue is the same: a publish-ready analysis, social thread, and newsletter block, with sources attached, ready for verification within 30 to 60 minutes of the triggering event.</p>
+  <h3 class="sub">What triggers it and what comes out</h3>
+  <p>A security event anywhere in Web3 — an exploit, a major payout, a significant disclosure — starts the clock. In the automated version, the system detects it immediately and begins working without any action from me. In the AI-assisted version, I run a morning scan that surfaces the most relevant events, ranked and sourced, and I select which ones to act on. Either way, the next step is the same: the system drafts a publish-ready content package against pre-built templates that encode Immunefi's voice, format, and editorial guardrails. No speculation on active incidents, no naming parties before confirmation, no unverified figures.</p>
+  <p>What arrives in the review queue, typically within 30 to 60 minutes of the event, is a complete package: a written analysis, a social thread, and a newsletter block, with sources attached. Any event involving an Immunefi client is automatically flagged and routed to the incident protocol instead. Nothing publishes without my review, and anything involving technical security claims requires sign-off from a named researcher before it goes out.</p>
 
   <h3 class="sub">How I would know it is working: four metrics</h3>
 
@@ -1317,25 +1317,25 @@
     <div class="metric-card">
       <div class="metric-num">01 · Speed</div>
       <div class="metric-title">Time from event to publish</div>
-      <p class="metric-body">Tracked via Notion timestamps (event date field vs. publish date field).</p>
+      <p class="metric-body">Tracked from the date of the triggering event to the date of publication.</p>
       <div class="metric-target">Target: under 24h for major events vs. multi-day industry baseline</div>
     </div>
     <div class="metric-card">
       <div class="metric-num">02 · Compression</div>
-      <div class="metric-title">Marketer hours per published unit</div>
-      <p class="metric-body">Tracked via a time-log field in the Notion review queue; I log time spent in review, not in drafting.</p>
-      <div class="metric-target">Target: 70% reduction vs. manual production within 30 days</div>
+      <div class="metric-title">Marketer hours per published piece</div>
+      <p class="metric-body">I log time spent in review and editing, not in drafting. The gap between the two is the system's contribution.</p>
+      <div class="metric-target">Target: 70% reduction vs. fully manual production within 30 days</div>
     </div>
     <div class="metric-card">
-      <div class="metric-num">03 · Quality-gate health</div>
+      <div class="metric-num">03 · Quality</div>
       <div class="metric-title">Drafts approved with minor edits</div>
-      <p class="metric-body">Rising rate = templates calibrating. Declining rate = system prompt retuning needed, not more output.</p>
+      <p class="metric-body">A rising approval rate means the templates are calibrating well. A declining rate means the templates need recalibration, not more volume.</p>
       <div class="metric-target">Target: 75%+ minor-edit approval rate by Day 60</div>
     </div>
     <div class="metric-card">
-      <div class="metric-num">04 · Business contribution</div>
+      <div class="metric-num">04 · Business impact</div>
       <div class="metric-title">Event-driven vs. evergreen traffic</div>
-      <p class="metric-body">GA attribution comparing rapid-response content vs. evergreen. If rapid-response does not outperform by Day 60, I reexamine signal-scoring criteria, not publishing cadence.</p>
+      <p class="metric-body">If rapid-response content does not outperform evergreen by Day 60, I reconsider what events are worth covering, not how fast to cover them.</p>
       <div class="metric-target">Target: rapid-response drives 30%+ of product-page referral traffic within 60 days</div>
     </div>
   </div>
