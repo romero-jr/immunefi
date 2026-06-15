@@ -16,8 +16,8 @@
     --ink:       #111111;
     --ink-2:     #444444;
     --ink-3:     #9A9490;
-    --orange:    #E8541A;
-    --orange-lt: #FBE9E2;
+    --orange:    #DC2626;
+    --orange-lt: #FEE2E2;
     --rule:      #E2DDD8;
     --mono:      'JetBrains Mono', monospace;
     --sans:      'Inter', system-ui, sans-serif;
@@ -703,8 +703,8 @@
   }
 
   .incident-harder {
-    background: #FFF0EA;
-    border: 0.5px solid #F5C4AA;
+    background: #FFF0F0;
+    border: 0.5px solid #FECACA;
     border-radius: 6px;
     padding: 20px;
     margin-top: 24px;
@@ -841,7 +841,7 @@
 <div id="progress"></div>
 
 <nav class="nav-dark" id="mainNav">
-  <div class="brand"><span>Immunefi</span> · Marketing Brief</div>
+  <div class="brand">Miguel Romero · <span>Immunefi</span></div>
   <ul class="nav-links">
     <li><a href="#strategy">Strategy</a></li>
     <li><a href="#gtm">GTM</a></li>
@@ -861,40 +861,18 @@
 <section class="cover-shell" id="coverShell">
   <div class="cover">
 
-    <div class="cover-logomark">
-      <!-- Immunefi diamond mark approximation -->
-      <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M16 2L28 9.5V22.5L16 30L4 22.5V9.5L16 2Z" stroke="white" stroke-width="1.5"/>
-        <path d="M16 8L24 12.5V21.5L16 26L8 21.5V12.5L16 8Z" fill="white" fill-opacity="0.15" stroke="white" stroke-width="0.75"/>
-        <path d="M16 13L20 15.5V20.5L16 23L12 20.5V15.5L16 13Z" fill="white"/>
-      </svg>
-      <span>Immunefi</span>
-    </div>
-
     <div class="cover-label">Marketing Strategy Brief · Part A + B</div>
 
     <h1 class="cover-title">Building the<br>Immunefi<br><em>Marketing</em><br>Engine</h1>
 
     <div class="cover-rule"></div>
 
-    <dl class="cover-meta">
-      <div class="cover-meta-item">
-        <dt>Author</dt>
-        <dd>Miguel</dd>
-      </div>
-      <div class="cover-meta-item">
-        <dt>Date</dt>
-        <dd>June 2026</dd>
-      </div>
-      <div class="cover-meta-item">
-        <dt>Scope</dt>
-        <dd>90-Day Plan</dd>
-      </div>
-    </dl>
-
     <div class="cover-ctas">
       <button class="cover-btn-primary" onclick="document.getElementById('strategy').scrollIntoView({behavior:'smooth'})">Read the Brief</button>
-      <button class="cover-btn-secondary" onclick="downloadPDF()">Download PDF</button>
+      <a class="cover-btn-secondary" href="https://github.com/romero-jr/immunefi/blob/bb9ed0d2a5f531114561e05c43937ef917ed6d11/immunefi_brief-miguelr.pdf" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:8px;text-decoration:none;">
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v8M5 7l3 3 3-3M3 12h10"/></svg>
+        Download PDF
+      </a>
     </div>
 
     <div class="cover-scroll">Scroll to read</div>
@@ -1184,7 +1162,7 @@
     <div class="pb">
       <div class="ph">
         <span class="ph-label">Automated pipeline</span>
-        <span class="ph-meta">~$60–100/mo · 24/7 continuous · requires n8n + API setup</span>
+        <span class="ph-meta">~$60–100/mo · 24/7 continuous · requires technical setup</span>
       </div>
       <div class="sg">
         <div class="sc">
@@ -1346,8 +1324,7 @@
 
   <!-- ── FOOTER ── -->
   <footer>
-    <div class="f-brand"><span>Immunefi</span> · Marketing Brief · Part A + B</div>
-    <div class="f-date">Miguel · June 2026</div>
+    <div class="f-brand"><span>Immunefi</span> · Marketing Brief</div>
   </footer>
 
 </div><!-- /wrapper -->
